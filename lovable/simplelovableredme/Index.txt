@@ -1,0 +1,418 @@
+/**
+ * STRUCTURE DU PROJET - DASHBOARD SCOLAIRE
+ * ==========================================
+ * 
+ * src/
+ * ├── pages/
+ * │   └── Index.tsx (CE FICHIER - tout le dashboard)
+ * ├── components/ui/ (composants de base Shadcn - ne pas modifier)
+ * ├── index.css (styles et thème)
+ * └── App.tsx (configuration routes)
+ * 
+ * Ce fichier contient TOUT le dashboard en un seul endroit pour faciliter
+ * la compréhension et la maintenance dans un contexte scolaire.
+ */
+
+import { useState } from "react"
+import { BarChart3, Users, ShoppingCart, TrendingUp, Settings, LayoutDashboard, Filter, Bell, Search, User } from "lucide-react"
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+
+// ============================================
+// DONNÉES EXEMPLES
+// ============================================
+
+const statsData = [
+  { title: "Utilisateurs totaux", value: "45,231", change: "+20.1%", icon: Users },
+  { title: "Revenus", value: "125,430€", change: "+15.3%", icon: TrendingUp },
+  { title: "Ventes", value: "2,345", change: "+8.2%", icon: ShoppingCart },
+  { title: "Taux de conversion", value: "3.24%", change: "+2.1%", icon: BarChart3 },
+]
+
+const lineChartData = [
+  { name: "Jan", ventes: 4000, revenus: 2400 },
+  { name: "Fév", ventes: 3000, revenus: 1398 },
+  { name: "Mar", ventes: 2000, revenus: 9800 },
+  { name: "Avr", ventes: 2780, revenus: 3908 },
+  { name: "Mai", ventes: 1890, revenus: 4800 },
+  { name: "Jun", ventes: 2390, revenus: 3800 },
+]
+
+const barChartData = [
+  { name: "Lun", visites: 4000, conversions: 2400 },
+  { name: "Mar", visites: 3000, conversions: 1398 },
+  { name: "Mer", visites: 2000, conversions: 9800 },
+  { name: "Jeu", visites: 2780, conversions: 3908 },
+  { name: "Ven", visites: 1890, conversions: 4800 },
+]
+
+const pieChartData = [
+  { name: "Direct", value: 400, color: "hsl(217, 91%, 60%)" },
+  { name: "Social", value: 300, color: "hsl(225, 83%, 67%)" },
+  { name: "Référencement", value: 200, color: "hsl(215, 20%, 65%)" },
+  { name: "Email", value: 100, color: "hsl(220, 14%, 96%)" },
+]
+
+const usersData = [
+  { id: 1, nom: "Alice Martin", email: "alice@exemple.com", role: "Admin", statut: "Actif" },
+  { id: 2, nom: "Bob Dupont", email: "bob@exemple.com", role: "Utilisateur", statut: "Actif" },
+  { id: 3, nom: "Claire Bernard", email: "claire@exemple.com", role: "Éditeur", statut: "Inactif" },
+  { id: 4, nom: "David Petit", email: "david@exemple.com", role: "Utilisateur", statut: "Actif" },
+]
+
+const tabs = [
+  { id: "overview", label: "Vue d'ensemble", icon: BarChart3 },
+  { id: "users", label: "Utilisateurs", icon: Users },
+  { id: "sales", label: "Ventes", icon: ShoppingCart },
+  { id: "analytics", label: "Analyses", icon: TrendingUp },
+  { id: "settings", label: "Paramètres", icon: Settings },
+]
+
+// ============================================
+// COMPOSANTS SIMPLES
+// ============================================
+
+const StatsCard = ({ title, value, change, icon: Icon }: any) => (
+  <Card className="border-0 shadow-soft bg-surface">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="text-2xl font-bold mt-2">{value}</p>
+          <p className="text-sm text-primary mt-1">{change} ce mois</p>
+        </div>
+        <div className="p-3 bg-primary/10 rounded-lg">
+          <Icon className="h-6 w-6 text-primary" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+)
+
+const ChartCard = ({ title, children }: any) => (
+  <Card className="border-0 shadow-soft bg-surface">
+    <CardHeader>
+      <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>{children}</CardContent>
+  </Card>
+)
+
+// ============================================
+// ONGLETS
+// ============================================
+
+const OverviewTab = () => (
+  <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {statsData.map((stat, i) => (
+        <StatsCard key={i} {...stat} />
+      ))}
+    </div>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ChartCard title="Évolution des ventes">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={lineChartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+            <YAxis stroke="hsl(var(--muted-foreground))" />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="ventes" stroke="hsl(217, 91%, 60%)" strokeWidth={2} />
+            <Line type="monotone" dataKey="revenus" stroke="hsl(225, 83%, 67%)" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartCard>
+
+      <ChartCard title="Sources de trafic">
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2} dataKey="value">
+              {pieChartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartCard>
+    </div>
+  </div>
+)
+
+const UsersTab = () => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold">Gestion des utilisateurs</h2>
+      <Button>Ajouter utilisateur</Button>
+    </div>
+    
+    <Card className="border-0 shadow-soft bg-surface">
+      <CardContent className="p-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nom</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rôle</TableHead>
+              <TableHead>Statut</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {usersData.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell className="font-medium">{user.nom}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs ${user.statut === "Actif" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {user.statut}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  </div>
+)
+
+const SalesTab = () => (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold">Statistiques de ventes</h2>
+    
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <StatsCard title="Ventes du jour" value="1,234€" change="+12%" icon={ShoppingCart} />
+      <StatsCard title="Ventes du mois" value="45,678€" change="+8%" icon={TrendingUp} />
+      <StatsCard title="Commandes" value="234" change="+15%" icon={BarChart3} />
+    </div>
+
+    <ChartCard title="Ventes hebdomadaires">
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={barChartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+          <YAxis stroke="hsl(var(--muted-foreground))" />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="visites" fill="hsl(217, 91%, 60%)" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="conversions" fill="hsl(225, 83%, 67%)" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
+  </div>
+)
+
+const AnalyticsTab = () => (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold">Analyses détaillées</h2>
+    
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <ChartCard title="Performance mensuelle">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={lineChartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+            <YAxis stroke="hsl(var(--muted-foreground))" />
+            <Tooltip />
+            <Line type="monotone" dataKey="ventes" stroke="hsl(217, 91%, 60%)" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </ChartCard>
+
+      <ChartCard title="Comparaison">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={barChartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+            <YAxis stroke="hsl(var(--muted-foreground))" />
+            <Tooltip />
+            <Bar dataKey="visites" fill="hsl(217, 91%, 60%)" />
+          </BarChart>
+        </ResponsiveContainer>
+      </ChartCard>
+    </div>
+  </div>
+)
+
+const SettingsTab = () => (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold">Paramètres</h2>
+    
+    <Card className="border-0 shadow-soft bg-surface">
+      <CardHeader>
+        <CardTitle>Préférences générales</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Langue</label>
+          <Select defaultValue="fr">
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox id="notifications" />
+          <label htmlFor="notifications" className="text-sm font-medium">Activer les notifications</label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox id="emails" />
+          <label htmlFor="emails" className="text-sm font-medium">Recevoir les emails marketing</label>
+        </div>
+
+        <Button className="mt-4">Enregistrer les modifications</Button>
+      </CardContent>
+    </Card>
+  </div>
+)
+
+// ============================================
+// COMPOSANT PRINCIPAL
+// ============================================
+
+const Index = () => {
+  const [activeTab, setActiveTab] = useState("overview")
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview": return <OverviewTab />
+      case "users": return <UsersTab />
+      case "sales": return <SalesTab />
+      case "analytics": return <AnalyticsTab />
+      case "settings": return <SettingsTab />
+      default: return <OverviewTab />
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      {/* SIDEBAR GAUCHE - Navigation */}
+      <aside className="w-64 bg-surface border-r border-border p-4">
+        <div className="flex items-center gap-2 mb-8">
+          <LayoutDashboard className="h-6 w-6 text-primary" />
+          <h1 className="text-xl font-bold">Dashboard</h1>
+        </div>
+        
+        <nav className="space-y-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                activeTab === tab.id
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-muted"
+              }`}
+            >
+              <tab.icon className="h-5 w-5" />
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="flex-1 flex">
+        {/* COLONNE FILTRES */}
+        <aside className="w-72 bg-surface border-r border-border p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Filter className="h-5 w-5" />
+            <h2 className="font-semibold">Filtres</h2>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Période</label>
+              <Select defaultValue="30">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 derniers jours</SelectItem>
+                  <SelectItem value="30">30 derniers jours</SelectItem>
+                  <SelectItem value="90">90 derniers jours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Catégorie</label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  <SelectItem value="tech">Technologie</SelectItem>
+                  <SelectItem value="sales">Ventes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Statut</label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="actif" defaultChecked />
+                  <label htmlFor="actif" className="text-sm">Actif</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="inactif" />
+                  <label htmlFor="inactif" className="text-sm">Inactif</label>
+                </div>
+              </div>
+            </div>
+
+            <Button className="w-full">Appliquer les filtres</Button>
+          </div>
+        </aside>
+
+        {/* CONTENU PRINCIPAL */}
+        <div className="flex-1 flex flex-col">
+          {/* HEADER */}
+          <header className="bg-surface border-b border-border px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Rechercher..." className="pl-10" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon">
+                  <Bell className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          {/* CONTENU */}
+          <main className="flex-1 p-6">
+            {renderTabContent()}
+          </main>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Index
